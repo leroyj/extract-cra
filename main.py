@@ -54,7 +54,8 @@ def process_file(data_file=None):
 def process_week(ws=None):
     rowdata_string = []
     # process category
-    for col in range(4, 4+365):  # ne gère pas les années bissextiles
+    for col in range(4, 4+365):  
+    # TODO: manage leap years
     # TODO: count the number of holidays per week on row 7
         day_value = ws.cell(row=5, column=col).value
         print (f"jour: {day_value.date()}/jour de la semaine: {day_value.date().weekday()}/jour du mois: {day_value.date().day}")
@@ -73,39 +74,40 @@ def process_week(ws=None):
     return rowdata_string
 
 def process_category(ws=None,col=4):
-    category_base_row=8
     rowstring = []
-    while ws.cell(row=category_base_row, column=2).value is not None:
-    #while category_base_row<22:
-        for offset in range(1, 6):  # detail
-            rowdata = []
-            line_index=category_base_row+offset
-            # print('    Processing category:', math.ceil(category_base_row/7))
-            # année
-            rowdata.append(str(ws['B1'].value))
-            # collaborateur
-            rowdata.append(ws['B2'].value)
-            # matricule
-            rowdata.append(str(ws['B3'].value))
-            # date_saisie
-            date_saisie = ws.cell(row=5, column=col).value
-            rowdata.append(f"{date_saisie.date()}")
-            # id_categorie
-            rowdata.append(str(ws.cell(row=category_base_row, column=2).value))
-            # Libelle_categorie
-            rowdata.append(str(ws.cell(row=category_base_row, column=3).value))
-            # detail_activite
-            rowdata.append(str(ws.cell(row=line_index, column=3).value))
-            # nb_jour
-            nb_jour = ws.cell(row=line_index, column=col)
-            if nb_jour.value is None:
-                continue
-            if isinstance(nb_jour.value, int) or isinstance(nb_jour.value, float):
-                # print('      Processing activity:', offset)
-                # print ('     ',str(ws.cell(row=line_index, column=3).value))
-                rowdata.append(str(nb_jour.value))
-            rowstring.append(rowdata)
-        category_base_row += 6
+    row_index = 8
+    category_row_index = row_index
+    while (current_category := ws.cell(row=row_index, column=2).value) is not None:
+        if current_category != "OK":
+            category_row_index=row_index
+            # print('    Processing category:', current_category)
+        else:
+            # print('    Processing activity:', ws.cell(row=row_index, column=3).value)
+            nb_jour = ws.cell(row=row_index, column=col)
+            if nb_jour.value is not None:
+                rowdata = []
+                # année
+                rowdata.append(str(ws['B1'].value))
+                # collaborateur
+                rowdata.append(ws['B2'].value)
+                # matricule
+                rowdata.append(str(ws['B3'].value))
+                # date_saisie
+                date_saisie = ws.cell(row=5, column=col).value
+                rowdata.append(f"{date_saisie.date()}")
+                # id_categorie
+                rowdata.append(str(ws.cell(row=category_row_index, column=2).value))
+                # Libelle_categorie
+                rowdata.append(str(ws.cell(row=category_row_index, column=3).value))
+                # detail_activite
+                rowdata.append(str(ws.cell(row=row_index, column=3).value))
+                # nb_jour
+                if isinstance(nb_jour.value, int) or isinstance(nb_jour.value, float):
+                    # print('      Processing activity:', offset)
+                    # print ('     ',str(ws.cell(row=line_index, column=3).value))
+                    rowdata.append(str(nb_jour.value))
+                rowstring.append(rowdata)
+        row_index += 1
     return rowstring
 
 def get_file_list(base_dir=None, prefix=FOLDER_PREFIX, extension=FILE_EXTENSION):

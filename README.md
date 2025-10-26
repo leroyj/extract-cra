@@ -77,13 +77,10 @@ Les variables globales se trouvent au début de `main.py`. Les plus importantes 
 
 Modification : si vous changez ces variables, enregistrez `main.py` puis lancez le script.
 
-## Remarques techniques
+## Limitations
 
-* openpyxl renvoie souvent des objets `datetime.datetime` pour les cellules date. Le script doit convertir en ISO date sans l'heure, par exemple :
-  * `val.date().isoformat()` ou `val.date()` puis format `YYYY-MM-DD`.
-* Si une cellule date est un nombre Excel, utilisez `openpyxl.utils.datetime.from_excel()` pour la convertir.
-* Le script actuel parcourt les colonnes jour/semaines à partir de la colonne D (index 4). Adaptez si votre gabarit diffère.
-* Pour inclure la dernière valeur `offset = 5`, utilisez `range(1, 6)` (borne supérieure exclusive).
+* Gérer les années bissextiles (366 jours) n'est pas encore implémenté.
+* Calculer le nombre de jours de congés n'est pas encore implémenté.
 
 ## Dépannage rapide
 
