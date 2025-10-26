@@ -1,6 +1,7 @@
 # extract data from multiple CRA files in several excel files into  a single csv file
 from openpyxl import load_workbook
 import csv
+import time
 
 # configuration variables
 FOLDER_PREFIX = 'CRA'
@@ -12,7 +13,10 @@ BASE_DIR = '/Users/jleroy/Documents/dev/CRA/TEST/CRA TS'  # set to None to use t
 # main function
 def main():
     print("Extraction des données des fichiers CRA vers des fichiers CSV")
-    print("Prenez un café, cela peut prendre un certain temps...")
+    print("Prenez un café, cela peut prendre un certain temps... (4h00 pour 100 fichiers environ sur un MacBook Pro 2020 M1)")
+
+    # démarrer le chrono global
+    start_time = time.time()
 
     # get the list of CRA files
     file_list = get_file_list()
@@ -22,7 +26,11 @@ def main():
     # process each file
     rowlist=[]
     for data_file in file_list:
+        file_start = time.time()
         process_file(data_file)
+        file_elapsed = time.time() - file_start
+        total_elapsed = time.time() - start_time
+        print(f"Temps traitement fichier : {file_elapsed:.2f}s — Temps écoulé depuis le début: {total_elapsed:.2f}s")
     return
 
 # process a single CRA file
@@ -43,7 +51,7 @@ def process_file(data_file=None):
     header.append("detail_activite")
     header.append("nb_jour")
     header_string=";".join(header)
-    print(header_string)
+    # print(header_string)
 
     # foreach week column
     rowlist=[]
@@ -58,17 +66,17 @@ def process_week(ws=None):
     # TODO: manage leap years
     # TODO: count the number of holidays per week on row 7
         day_value = ws.cell(row=5, column=col).value
-        print (f"jour: {day_value.date()}/jour de la semaine: {day_value.date().weekday()}/jour du mois: {day_value.date().day}")
         if day_value is None:
             # print('  No day value at column:', col)
             continue
         if day_value.date().weekday() == 0 or (day_value.date().day == 1 and day_value.date().weekday() != 5 and day_value.date().weekday() != 6):
-            # print('  Processing week:', col-3)
+            print('  Processing week:', col-3)
+            # print (f"jour: {day_value.date()}/jour de la semaine: {day_value.date().weekday()}/jour du mois: {day_value.date().day}")
             processed_categories=process_category(ws,col)
             # print('  Processed categories:', processed_categories)
             rowdata_string += processed_categories
             # rowdata_string.append(";".join(rowdata))
-            print(rowdata_string)
+            # print(rowdata_string)
         else:
             continue
     return rowdata_string
